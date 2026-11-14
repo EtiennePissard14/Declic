@@ -240,6 +240,14 @@ details.folder .in{display:flex;flex-direction:column;gap:10px;padding-bottom:14
 .toast.on{opacity:1;transform:none}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 
+.folderbtn,.frow{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:13px 14px;border-radius:14px;background:var(--card);border:1px solid var(--line);font-size:.94rem}
+.folderbtn .fl,.frow > span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis}
+.folderbtn b{font-weight:600}
+.folderbtn small,.frow small{display:block;color:var(--muted);font-size:.78rem;margin-top:2px}
+.folderbtn .ic,.frow .ic{color:var(--muted)}
+.frow.special > .ic:first-child{color:var(--accent)}
+.flist{display:flex;flex-direction:column;gap:6px}
+.flist p{padding:8px 2px}
 code{font-size:.78rem;word-break:break-all;background:var(--card);border:1px solid var(--line);padding:2px 6px;border-radius:6px}
 .screen > input[type=text]{width:100%}
 details.folder .in input{width:100%}
@@ -314,14 +322,7 @@ video.main{background:#000}
       <div><span data-i="sparkle"></span><p><b>Photos reçues</b><span>WhatsApp, captures d’écran : la date est celle de la réception, pas de la prise de vue.</span></p></div>
       <div><span data-i="layers"></span><p><b>Date retrouvée ou saisie</b><span>Si une photo ressemblante prise par votre téléphone existe, sa date est proposée. Sinon, vous la saisissez. Après validation, la date est écrite dans le fichier (JPEG) ; l’ancienne version reste dans l’historique des versions OneDrive.</span></p></div>
     </div>
-    <details class="folder">
-      <summary><span data-i="folder"></span><span>Dossier : <b id="folder-label">Pellicule</b></span></summary>
-      <div class="in">
-        <input type="text" id="in-folder" placeholder="Pellicule (par défaut) ou Images/Vacances" autocomplete="off" spellcheck="false" aria-label="Dossier à trier">
-        <label class="check"><input type="checkbox" id="in-recurse" checked> Inclure les sous-dossiers</label>
-        <button class="btn light sm" id="btn-reload">Recharger la bibliothèque</button>
-      </div>
-    </details>
+    <button class="folderbtn" id="btn-folder"><span data-i="folder"></span><span class="fl">Dossier : <b id="folder-label">Pellicule</b><small id="folder-sub"></small></span><span data-i="chev" data-s="18"></span></button>
     <button class="btn dark" id="btn-start" disabled></button>
     <div class="panel">
       <div class="streak-head"><span class="flame"><span data-i="flame" data-s="24"></span></span><div><b id="streak-n">0 jour</b><span>de suite</span></div></div>
@@ -356,6 +357,23 @@ video.main{background:#000}
       <button class="big del" id="btn-del" aria-label="Libérer (flèche gauche)"><span data-i="trash" data-s="30"></span></button>
       <button class="undo" id="btn-undo" aria-label="Annuler la dernière action" disabled><span data-i="undo" data-s="18"></span></button>
       <button class="big keep" id="btn-keep" aria-label="Garder (flèche droite)"><span data-i="heart" data-s="30"></span></button>
+    </div>
+  </section>
+
+  <!-- Choix du dossier -->
+  <section class="screen scroll" id="s-folders" aria-label="Choisir un dossier">
+    <header class="top"><button class="link" id="btn-folders-back"><span data-i="back"></span>Tableau de bord</button></header>
+    <div>
+      <h2 class="display">Choisir un <em>dossier</em></h2>
+      <p class="muted small" id="fold-path" style="margin-top:8px"></p>
+    </div>
+    <button class="frow special" id="fold-all"><span data-i="cloud"></span><span>Tout mon OneDrive<small>Toutes les photos et vidéos, dans tous les dossiers</small></span><span data-i="chev" data-s="18"></span></button>
+    <button class="frow special" id="fold-camera"><span data-i="sparkle"></span><span>Pellicule<small>Le dossier où votre téléphone envoie ses photos</small></span><span data-i="chev" data-s="18"></span></button>
+    <div class="flist" id="fold-list"></div>
+    <label class="check"><input type="checkbox" id="in-recurse" checked> Inclure les sous-dossiers</label>
+    <div class="sticky">
+      <button class="btn dark" id="btn-fold-pick" disabled>Choisissez un dossier</button>
+      <button class="btn ghost" id="btn-fold-up">Dossier parent</button>
     </div>
   </section>
 
@@ -2984,7 +3002,7 @@ SOFTWARE.
     clientId: '',
     authority: 'https://login.microsoftonline.com/consumers', // comptes Microsoft personnels
     scopes: ['User.Read', 'Files.ReadWrite'],
-    maxItems: 3000
+    maxItems: 20000
   };
 
   const $ = id => document.getElementById(id);
@@ -3016,6 +3034,7 @@ SOFTWARE.
     layers:'<rect x="8" y="8" width="12" height="12" rx="3"/><path d="M4 16V7a3 3 0 0 1 3-3h9"/>',
     folder:'<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>',
     back:'<path d="M15 6l-6 6 6 6"/>',
+    chev:'<path d="M9 6l6 6-6 6"/>',
     play:'<path d="M8 5l11 7-11 7z" fill="currentColor"/>',
     pause:'<rect x="6" y="5" width="4" height="14" rx="1" fill="currentColor" stroke="none"/><rect x="14" y="5" width="4" height="14" rx="1" fill="currentColor" stroke="none"/>',
     muted:'<path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor" stroke="none"/><path d="M17 9l4 6M21 9l-4 6"/>',
@@ -3160,12 +3179,17 @@ SOFTWARE.
       const out = [];
       const base = (st.folder || '').trim().replace(/^\/+|\/+$/g, '');
       const q = '?$top=200&$expand=thumbnails';
-      const queue = [base ? `/me/drive/root:/${base.split('/').map(encodeURIComponent).join('/')}:/children${q}` : `/me/drive/special/cameraroll/children${q}`];
+      const all = st.folder === '/';
+      const first = all ? `/me/drive/root/children${q}` : base ? `/me/drive/root:/${base.split('/').map(encodeURIComponent).join('/')}:/children${q}` : `/me/drive/special/cameraroll/children${q}`;
+      const queue = [first];
+      let skipped = 0;
       while (queue.length && out.length < CONFIG.maxItems){
         let url = queue.shift();
+        const isFirst = url === first;
         while (url && out.length < CONFIG.maxItems){
           const r = await gfetch(url);
-          if (r.status === 404) throw new Error(base ? `Dossier introuvable : ${base}` : 'Pellicule introuvable : indiquez un dossier.');
+          if (!r.ok && !isFirst){ skipped++; break; } // sous-dossier inaccessible (coffre-fort, partage…) : on passe
+          if (r.status === 404) throw new Error(all ? 'OneDrive inaccessible.' : base ? `Dossier introuvable : ${base}` : 'Pellicule introuvable : choisissez un dossier.');
           if (!r.ok) throw new Error(`Microsoft Graph a répondu ${r.status}`);
           const j = await r.json();
           for (const d of j.value){
@@ -3173,15 +3197,18 @@ SOFTWARE.
             if (d.file && /^(image|video)\//.test(d.file.mimeType || '')) out.push(toItem(d));
           }
           url = j['@odata.nextLink'];
-          $('home-sub').textContent = `Chargement : ${out.length} fichiers…`;
+          if (!loaded && out.length){ items = out; loaded = true; renderHome(); }
+          $('home-sub').textContent = `Chargement : ${out.length} fichiers…${st.tab === 'swipe' && loaded ? ' Vous pouvez déjà lancer une séance.' : ''}`;
         }
       }
       items = out; loaded = true;
+      if (out.length >= CONFIG.maxItems) toast(`Limite de ${CONFIG.maxItems.toLocaleString('fr-FR')} fichiers atteinte : choisissez un dossier plus précis pour voir le reste.`, 7000);
+      else if (skipped) toast(`${plural(skipped, 'dossier')} inaccessible${skipped > 1 ? 's' : ''} ignoré${skipped > 1 ? 's' : ''} (coffre-fort personnel ou dossier partagé, par exemple).`, 6000);
     } catch (e) {
       toast(esc(e.message || 'Chargement impossible'), 6000);
     } finally { loading = false; renderHome(); }
   }
-  const folderName = () => (st.folder || '').trim() || 'Pellicule';
+  const folderName = () => st.folder === '/' ? 'Tout mon OneDrive' : (st.folder || '').trim() || 'Pellicule';
   const inMedia = p => st.media === 'both' || p.type === st.media;
   const mediaPool = () => items.filter(inMedia);
   const remaining = () => items.filter(p => !keptSet.has(p.id) && inMedia(p));
@@ -3204,7 +3231,7 @@ SOFTWARE.
     $('pane-swipe').hidden = dups || dates; $('pane-dups').hidden = !dups; $('pane-dates').hidden = !dates;
     $('home-title').innerHTML = dates ? 'Des <em>dates</em> remises en ordre.' : dups ? 'Vos <em>doublons</em>, réglés en un passage.' : `Vos <em>${m} minutes</em> du jour vous attendent.`;
     $('btn-start').innerHTML = dates ? `${ico('cal', 18)}Corriger les dates` : dups ? `${ico('layers', 18)}Rechercher les doublons` : `${ico('play', 18)}Lancer mes ${m} minutes`;
-    $('btn-start').disabled = !loaded;
+    $('btn-start').disabled = !loaded || (loading && st.tab !== 'swipe');
     if (loading){ /* le texte de progression est mis à jour par loadLibrary */ }
     else if (!loaded) $('home-sub').textContent = 'Bibliothèque non chargée.';
     else {
@@ -3223,6 +3250,7 @@ SOFTWARE.
     $('year-wrap').hidden = st.order !== 'from-year';
     $('in-year').value = st.year;
     $('folder-label').textContent = folderName();
+    $('folder-sub').textContent = st.recurse ? 'Avec les sous-dossiers' : 'Sans les sous-dossiers';
     $('streak-n').textContent = plural(streak(), 'jour');
     const set = new Set(st.days), L = ['D','L','M','M','J','V','S'], today = new Date();
     $('week').innerHTML = Array.from({length: 7}, (_, i) => {
@@ -3239,9 +3267,33 @@ SOFTWARE.
   $('opts-order').addEventListener('click', e => { const b = e.target.closest('[data-o]'); if (!b) return; st.order = b.dataset.o; save(); renderHome(); });
   $('in-year').addEventListener('change', e => { st.year = +e.target.value; save(); });
   document.querySelector('.tabs').addEventListener('click', e => { const b = e.target.closest('[data-tab]'); if (!b) return; st.tab = b.dataset.tab; save(); renderHome(); });
-  $('in-folder').addEventListener('change', () => { st.folder = $('in-folder').value.trim(); save(); loadLibrary(); });
-  $('in-recurse').addEventListener('change', () => { st.recurse = $('in-recurse').checked; save(); loadLibrary(); });
-  $('btn-reload').onclick = () => loadLibrary();
+  // ---------- Choix du dossier (explorateur OneDrive) ----------
+  let FP = '';
+  const encPath = path => path.split('/').map(encodeURIComponent).join('/');
+  async function listFolders(){
+    $('fold-path').textContent = FP ? `OneDrive / ${FP.split('/').join(' / ')}` : 'OneDrive';
+    $('btn-fold-up').hidden = !FP;
+    $('btn-fold-pick').disabled = !FP;
+    $('btn-fold-pick').textContent = FP ? `Trier « ${FP.split('/').pop()} »` : 'Choisissez un dossier';
+    $('fold-list').innerHTML = '<p class="muted small">Chargement des dossiers…</p>';
+    try {
+      let list = [], next = (FP ? `/me/drive/root:/${encPath(FP)}:/children` : '/me/drive/root/children') + '?$top=200&$select=id,name,folder';
+      while (next){ const j = await gjson(next); list = list.concat(j.value.filter(d => d.folder)); next = j['@odata.nextLink']; }
+      list.sort((a, b) => a.name.localeCompare(b.name, 'fr'));
+      $('fold-list').innerHTML = list.length
+        ? list.map(d => `<button class="frow" data-name="${esc(d.name)}">${ico('folder', 20)}<span>${esc(d.name)}<small>${plural(d.folder.childCount || 0, 'élément')}</small></span>${ico('chev', 18)}</button>`).join('')
+        : '<p class="muted small">Aucun sous-dossier ici.</p>';
+    } catch (e) { $('fold-list').innerHTML = `<p class="muted small">${esc(e.message || 'Impossible de lister les dossiers.')}</p>`; }
+  }
+  function chooseFolder(path){ st.folder = path; save(); toHome(); loadLibrary(); }
+  $('btn-folder').onclick = () => { FP = st.folder === '/' ? '' : st.folder || ''; $('in-recurse').checked = st.recurse; show('s-folders'); listFolders(); };
+  $('fold-list').addEventListener('click', e => { const b = e.target.closest('[data-name]'); if (!b) return; FP = FP ? `${FP}/${b.dataset.name}` : b.dataset.name; listFolders(); });
+  $('btn-fold-up').onclick = () => { FP = FP.split('/').slice(0, -1).join('/'); listFolders(); };
+  $('btn-fold-pick').onclick = () => chooseFolder(FP);
+  $('fold-camera').onclick = () => chooseFolder('');
+  $('fold-all').onclick = () => { $('in-recurse').checked = true; st.recurse = true; chooseFolder('/'); };
+  $('btn-folders-back').onclick = () => { if (st.recurse !== $('in-recurse').checked){ st.recurse = $('in-recurse').checked; save(); loadLibrary(); } toHome(); };
+  $('in-recurse').addEventListener('change', () => { st.recurse = $('in-recurse').checked; save(); });
 
   // ---------- Ordre de passage ----------
   function shuffle(a){ for (let i = a.length - 1; i > 0; i--){ const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
@@ -3745,7 +3797,7 @@ SOFTWARE.
     catch (e) { show('s-landing'); toast(esc(e.message || 'Erreur de connexion'), 8000); return; }
     if (!account){ show('s-landing'); return; }
     await loadState();
-    $('in-folder').value = st.folder; $('in-recurse').checked = st.recurse;
+    $('in-recurse').checked = st.recurse;
     toHome();
     loadLibrary();
   }
